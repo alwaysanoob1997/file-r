@@ -20,10 +20,38 @@ def edit_json():
 
 # Function for adding a filetype to an existing class
 def add_filetype(data):
+    # input for filetype
+    new_filetype = input("Please mention the filetype as the example: '.mkv'\n").lower()
+    # String conditional to make sure extensions have a '.' as the first character
+    update = new_filetype if new_filetype.startswith('.') else '.' + new_filetype
+
+    # make sure given extension is not already present in data
+    for key, value in data.items():
+        if update in value:
+            print(f"Extension already present under {key}\n")
+            exit(0)
+
+    time.sleep(3)
+
+    # Make sure class name matches something in list
+    full_class = class_matcher(data)
+
+    # Add to data
+    data[full_class[0]].append(update)
+
+    # write to file
+    with open(helper.DATA_FILE, 'w') as extensions:
+        json_data = json.dumps(data, indent=2)
+        extensions.write(json_data)
+
+
+def class_matcher(data):
+
     # Printing out existing classes
     print('Available classes:')
     print(*data, sep='\n')  # *data unpacks the list in the print function
-    class_to_edit = input(f'Please Select Class by name from above:\n').title()
+
+    class_to_edit = input(f'Please select class to add extension to by name from above:\n').title()
 
     # list comprehension to select classes with only a substring entry
     full_class = [i for i in data if class_to_edit in i]
@@ -32,24 +60,10 @@ def add_filetype(data):
     if len(full_class) < 1:
         print("Input does not match any Class. Please Try Again")
         time.sleep(3)
-        add_filetype(data)
+        class_matcher(data)
         exit(0)
 
-    # input for filetype
-    new_filetype = input("Please mention the filetype as the example: '.mkv'\n").lower()
-    # String conditional to make sure extensions have a '.' as the first character
-    update = new_filetype if new_filetype.startswith('.') else '.' + new_filetype
-
-    # make sure given extension is not already present in data
-    if update not in data[full_class[0]]:
-        data[full_class[0]].append(update)
-    else:
-        print("Class already present.\n")
-
-    # write to file
-    with open(helper.DATA_FILE, 'w') as extensions:
-        json_data = json.dumps(data, indent=2)
-        extensions.write(json_data)
+    return full_class
 
 
 # function to add new class
